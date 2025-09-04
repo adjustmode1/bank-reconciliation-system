@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  ## Redis-Server
+  ## docker-compose -f docker-compose.yml -p bank_reconciliation up -d redis_server
+  ## docker-compose -f docker-compose.yml -p bank_reconciliation rm -f -s -v -a redis_server
+  ## docker exec -it bank_reconciliation /bin/sh
+  redis_server:
+    image: redis:7.2
+    # command: redis-server /usr/local/etc/redis/redis.conf --appendonly yes
+    container_name: bank_reconciliation_redis_server
+    restart: "no"
+    volumes:
+      - $HOME/docker_bank_data/redis/data:/data
+    environment:
+     REDIS_USERNAME: default
+     REDIS_PASSWORD: Abc#1234
+    ports:
+      - "6379:6379"
+    deploy:
+      replicas: 1
+
+  ## Postgres-Server
+  ## docker-compose -f docker-compose.yml -p bank_reconciliation up -d postgres_server
+  ## docker-compose -f docker-compose.yml -p bank_reconciliation rm -f -s -v -a postgres_server
+  ## docker exec -it bank_reconciliation /bin/sh
+  postgres_server:
+    image: postgres:17.5
+    container_name: bank_reconciliation_postgres_server
+    restart: "no"
+    shm_size: 128mb
+    volumes:
+      - $HOME/docker_data/postgres/pgdata:/var/lib/postgresql/data/pgdata
+    environment:
+      PGDATA: /var/lib/postgresql/data/pgdata
+      POSTGRES_USER: postgresuser
+      POSTGRES_PASSWORD: abcd#1234
+      POSTGRES_DB: bank_reconciliation
+    ports:
+      - "5432:5432"
+    deploy:
+      replicas: 1
