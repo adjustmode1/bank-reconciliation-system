@@ -40,3 +40,123 @@ services:
       - "5432:5432"
     deploy:
       replicas: 1
+    
+  ## Minio-Server
+  ## docker-compose -f docker-compose.yml -p bank_reconciliation up -d minio_server
+  ## docker-compose -f docker-compose.yml -p bank_reconciliation rm -f -s -v -a minio_server
+  ## docker exec -it minio_server /bin/sh
+  ## Access Key: EVarWQp0g0Vf12VwKAH7
+  ## Secret Key: LmQg7mEsgmAU5tEi6ktqlLrbcnuK1VQod6R3jQJa
+  ## http://localhost:9000/ecommerce-dev/sample/logo.png
+  minio_server:
+    container_name: minio_server
+    image: minio/minio:RELEASE.2024-11-07T00-52-20Z
+    restart: "always"
+    volumes:
+      - $HOME/docker_bank_data/minio/data/:/data/
+    environment:
+      MINIO_ROOT_USER: "s3_admin"
+      MINIO_ROOT_PASSWORD: "Abc@1234"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    command: server --console-address ":9001" /data
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+    deploy:
+      replicas: 1
+
+  ## Kafka_kraft_broker_1 (without Zookeeper_1) (Cluster 3 broker for KRaft mode)
+  ## docker-compose -f docker-compose.yml -p bank_reconciliation up -d kafka_kraft_broker_1
+  ## docker-compose -f docker-compose.yml -p bank_reconciliation rm -f -s -v -a kafka_kraft_broker_1
+  ## docker exec -it kafka_kraft_broker_1 /bin/sh
+  kafka_kraft_broker_1:
+    container_name: bank_reconciliation_kafka_kraft_broker_1
+    hostname: kafka_kraft_broker_1
+    image: bitnami/kafka:4.0.0
+    restart: "always"
+    ports:
+      - '9081:9081'
+    environment:
+      # KRaft settings
+      KAFKA_KRAFT_CLUSTER_ID: 'banckabc'
+      KAFKA_CFG_NODE_ID: 0
+      KAFKA_CFG_PROCESS_ROLES: 'controller,broker'
+      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: '0@bank_reconciliation_kafka_kraft_broker_1:9093,1@kafka_kraft_broker_2:9093,2@bank_reconciliation_kafka_kraft_broker_3:9093'
+      KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: true
+      # Listeners
+      KAFKA_CFG_LISTENERS: 'PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://0.0.0.0:9081'
+      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: 'PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT'
+      KAFKA_CFG_ADVERTISED_LISTENERS: 'PLAINTEXT://bank_reconciliation_kafka_kraft_broker_1:9092,EXTERNAL://localhost:9081'
+      KAFKA_CFG_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+      KAFKA_CFG_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT'
+      # Clustering
+      KAFKA_CFG_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      KAFKA_CFG_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
+      KAFKA_CFG_TRANSACTION_STATE_LOG_MIN_ISR: 2
+    depends_on:
+      - kafka_kraft_broker_2
+
+  ## Kafka_kraft_broker_2 (without Zookeeper_1) (Cluster 3 broker for KRaft mode)
+  ## docker-compose -f docker-compose.yml -p bank_reconciliation up -d kafka_kraft_broker_2
+  ## docker-compose -f docker-compose.yml -p bank_reconciliation rm -f -s -v -a kafka_kraft_broker_2
+  ## docker exec -it kafka_kraft_broker_2 /bin/sh
+  kafka_kraft_broker_2:
+    container_name: bank_reconciliation_kafka_kraft_broker_2
+    hostname: kafka_kraft_broker_2
+    image: bitnami/kafka:4.0.0
+    restart: "always"
+    ports:
+      - '9082:9082'
+    environment:
+      # KRaft settings
+      KAFKA_KRAFT_CLUSTER_ID: 'banckabc'
+      KAFKA_CFG_NODE_ID: 1
+      KAFKA_CFG_PROCESS_ROLES: 'controller,broker'
+      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: '0@bank_reconciliation_kafka_kraft_broker_1:9093,1@bank_reconciliation_kafka_kraft_broker_2:9093,2@bank_reconciliation_kafka_kraft_broker_3:9093'
+      KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: true
+      # Listeners
+      KAFKA_CFG_LISTENERS: 'PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://0.0.0.0:9082'
+      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: 'PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT'
+      KAFKA_CFG_ADVERTISED_LISTENERS: 'PLAINTEXT://bank_reconciliation_kafka_kraft_broker_2:9092,EXTERNAL://localhost:9082'
+      KAFKA_CFG_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+      KAFKA_CFG_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT'
+      # Clustering
+      KAFKA_CFG_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      KAFKA_CFG_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
+      KAFKA_CFG_TRANSACTION_STATE_LOG_MIN_ISR: 2
+    depends_on:
+      - kafka_kraft_broker_3
+
+  ## Kafka_kraft_broker_3 (without Zookeeper_1) (Cluster 3 broker for KRaft mode)
+  ## docker-compose -f docker-compose.yml -p bank_reconciliation up -d kafka_kraft_broker_3
+  ## docker-compose -f docker-compose.yml -p bank_reconciliation rm -f -s -v -a kafka_kraft_broker_3
+  ## docker exec -it kafka_kraft_broker_3 /bin/sh
+  kafka_kraft_broker_3:
+    container_name: bank_reconciliation_kafka_kraft_broker_3
+    hostname: kafka_kraft_broker_3
+    image: bitnami/kafka:4.0.0
+    restart: "always"
+    ports:
+      - '9083:9083'
+    environment:
+      # KRaft settings
+      KAFKA_KRAFT_CLUSTER_ID: 'banckabc'
+      KAFKA_CFG_NODE_ID: 2
+      KAFKA_CFG_PROCESS_ROLES: 'controller,broker'
+      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: '0@bank_reconciliation_kafka_kraft_broker_1:9093,1@bank_reconciliation_kafka_kraft_broker_2:9093,2@bank_reconciliation_kafka_kraft_broker_3:9093'
+      KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: true
+      # Listeners
+      KAFKA_CFG_LISTENERS: 'PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://0.0.0.0:9083'
+      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: 'PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT'
+      KAFKA_CFG_ADVERTISED_LISTENERS: 'PLAINTEXT://bank_reconciliation_kafka_kraft_broker_3:9092,EXTERNAL://localhost:9083'
+      KAFKA_CFG_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+      KAFKA_CFG_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT'
+      # Clustering
+      KAFKA_CFG_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      KAFKA_CFG_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
+      KAFKA_CFG_TRANSACTION_STATE_LOG_MIN_ISR: 2
+  
