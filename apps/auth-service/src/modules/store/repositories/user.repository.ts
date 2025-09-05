@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserEntity } from '../entities/user.entity';
-import { AuthService } from 'src/modules/auth/auth.service';
+import { AuthService } from '../../../modules/auth/auth.service';
 import { SexEnum } from '../enums/sex.enum';
 
 @Injectable()
@@ -48,13 +48,23 @@ export class UserRepository {
   async createInitAccount(
     username: string,
     password: string,
+    name: string,
+    sex: SexEnum,
+    code: string,
+    address: string,
   ): Promise<UserEntity | Error> {
     try {
       this.logger.verbose('.createInitAccount', { username });
 
+      const now = new Date();
       const user = this.userRepository.create({
         username,
         password,
+        name,
+        code,
+        sex,
+        address,
+        createAt: now,
       });
 
       await this.userRepository.save(user);

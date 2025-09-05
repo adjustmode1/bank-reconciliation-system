@@ -30,7 +30,7 @@ services:
     restart: "no"
     shm_size: 128mb
     volumes:
-      - $HOME/docker_data/postgres/pgdata:/var/lib/postgresql/data/pgdata
+      - $HOME/docker_bank_data/postgres/pgdata:/var/lib/postgresql/data/pgdata
     environment:
       PGDATA: /var/lib/postgresql/data/pgdata
       POSTGRES_USER: postgresuser

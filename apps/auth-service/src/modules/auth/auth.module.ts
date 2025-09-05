@@ -8,6 +8,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import { JwtAuthGuard } from './guard/jwt-auth.guard';
 import { JwtModule } from '@nestjs/jwt';
 import { PostGreSQLModule } from '../store/postgresql.module';
+import { JwtRefreshGuard } from './guard/jwt-refresh.guard';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { PostGreSQLModule } from '../store/postgresql.module';
     JwtStrategy,
     JwtRefreshStrategy,
     JwtAuthGuard,
+    JwtRefreshGuard,
     ...AUTH_COMMAND_HANDLERS,
   ],
   exports: [JwtStrategy, JwtRefreshStrategy, AuthService],

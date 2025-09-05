@@ -14,7 +14,7 @@ export class JwtRefreshStrategy extends PassportStrategy(
 ) {
   constructor(
     private readonly config: ConfigService<AllConfigType>,
-    private driverRefreshRepo: UserRefreshTokenRepository,
+    private userRefreshRepository: UserRefreshTokenRepository,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromBodyField('refreshToken'),
@@ -28,7 +28,7 @@ export class JwtRefreshStrategy extends PassportStrategy(
     payload: JwtTokenResponse,
   ): Promise<Record<string, unknown>> {
     const refreshToken = req.body.refreshToken as unknown as string;
-    const user = await this.driverRefreshRepo.getRefreshToken(refreshToken);
+    const user = await this.userRefreshRepository.getRefreshToken(refreshToken);
     if (!user) throw new UnauthorizedException();
 
     return { ...payload, refreshToken };

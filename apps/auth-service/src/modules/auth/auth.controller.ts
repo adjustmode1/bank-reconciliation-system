@@ -10,7 +10,7 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { ValidationErrorResponse } from 'src/responses/validation-error.response';
+import { ValidationErrorResponse } from '../../responses/validation-error.response';
 import { LoginDto } from './dto/login.dto';
 import { LoginResponse } from './responses/login.response';
 import { LoginHeaderDto } from './dto/login-header.dto';
@@ -18,15 +18,15 @@ import { ValidatedHeaders } from './decorators/validate-header.decorator';
 import { LoginCommand } from './commands/impl/login.command';
 import { RefreshTokenResponse } from './responses/refresh-token.reponse';
 import { JwtAuthGuard } from './guard/jwt-auth.guard';
-import { UnAuthorizationResponse } from 'src/responses/responses/un-authorization.response';
+import { UnAuthorizationResponse } from '../../responses/responses/un-authorization.response';
 import { LogoutResponse } from './responses/logout.response';
 import { JwtTokenResponse } from './responses/jwt-token.response';
 import { GetUser } from './decorators/get-user-info.decorator';
 import { LogoutCommand } from './commands/impl/logout.command';
-import { AuthGuard } from '@nestjs/passport';
 import { RefreshTokenInformationResponse } from './responses/refresh-token-information.response';
 import { RefreshTokenCommand } from './commands/impl/refresh-token.command';
 import { ReGenerateRefreshTokenResponse } from './responses/re-generate-refresh-token.response';
+import { JwtRefreshGuard } from './guard/jwt-refresh.guard';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -79,15 +79,27 @@ export class AuthController {
     };
   }
 
-  @UseGuards(AuthGuard('jwt-refresh'))
+  @UseGuards(JwtRefreshGuard)
   @Post('refresh-token')
-  @ApiBearerAuth()
   @ApiOperation({ summary: 'Regenerate refresh token' })
   @ApiOkResponse({
     description: 'Logout successfully',
     type: ReGenerateRefreshTokenResponse,
   })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        refreshToken: {
+          type: 'string',
+          example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9',
+        },
+      },
+      required: ['refreshToken'],
+    },
+  })
   async refreshToken(
+    @Body('refreshToken') refreshToken: string,
     @GetUser() data: JwtTokenResponse,
   ): Promise<ReGenerateRefreshTokenResponse> {
     this.logger.verbose('.refreshToken');
@@ -95,7 +107,7 @@ export class AuthController {
     const messageResult = await this.commandBus.execute<
       RefreshTokenCommand,
       RefreshTokenInformationResponse
-    >(new RefreshTokenCommand(data.username, data.driverId, data.refreshToken));
+    >(new RefreshTokenCommand(data.username, data.driverId, refreshToken));
 
     return {
       data: messageResult,

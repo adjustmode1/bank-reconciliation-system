@@ -9,8 +9,8 @@ import { AuthGuard } from '@nestjs/passport';
 import { TokenExpiredError } from '@nestjs/jwt';
 
 @Injectable()
-export class JwtAuthGuard extends AuthGuard('jwt') {
-  private readonly logger = new Logger(JwtAuthGuard.name);
+export class JwtRefreshGuard extends AuthGuard('jwt-refresh') {
+  private readonly logger = new Logger(JwtRefreshGuard.name);
 
   constructor() {
     super();
@@ -24,13 +24,19 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
   handleRequest(err, user, info) {
     if (err || !user) {
       if (info instanceof TokenExpiredError) {
-        throw new HttpException('Token expired', HttpStatus.UNAUTHORIZED);
+        throw new HttpException(
+          'Refresh token expired',
+          HttpStatus.UNAUTHORIZED,
+        );
       }
       if (info?.message === 'No auth token') {
-        throw new HttpException('Invalid Token', HttpStatus.UNAUTHORIZED);
+        throw new HttpException(
+          'Invalid refresh token',
+          HttpStatus.UNAUTHORIZED,
+        );
       }
 
-      throw new HttpException('Invalid Token', HttpStatus.UNAUTHORIZED);
+      throw new HttpException('Invalid refresh token', HttpStatus.UNAUTHORIZED);
     }
     return user;
   }

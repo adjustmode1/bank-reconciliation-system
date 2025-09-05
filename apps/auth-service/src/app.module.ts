@@ -11,6 +11,7 @@ import { join } from 'path';
 import postgresqlConfig from './modules/store/config/postgresql.config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './modules/auth/auth.module';
+import { PassportModule } from '@nestjs/passport';
 
 @Module({
   imports: [
@@ -51,6 +52,7 @@ import { AuthModule } from './modules/auth/auth.module';
     }),
     CacheModule,
     AuthModule,
+    PassportModule,
     PostGreSQLModule,
     CqrsModule.forRoot(),
   ],

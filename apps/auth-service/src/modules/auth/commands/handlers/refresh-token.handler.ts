@@ -5,7 +5,7 @@ import { AllConfigType } from '../../../../config/config.type';
 import { RefreshTokenCommand } from '../impl/refresh-token.command';
 import { AuthService } from '../../auth.service';
 import { RefreshTokenInformationResponse } from '../../responses/refresh-token-information.response';
-import { UserRepository } from 'src/modules/store/repositories/user.repository';
+import { UserRepository } from '../../../../modules/store/repositories/user.repository';
 
 @CommandHandler(RefreshTokenCommand)
 export class RefreshTokenHandler

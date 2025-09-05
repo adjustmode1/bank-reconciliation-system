@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { MoreThan, Repository } from 'typeorm';
 import { UserRefreshTokenEntity } from '../entities/refresh-token.entity';
 
 @Injectable()
@@ -56,13 +56,17 @@ export class UserRefreshTokenRepository {
   }
 
   async getRefreshToken(
-    deviceId: string,
+    refreshToken: string,
   ): Promise<UserRefreshTokenEntity | null | Error> {
     try {
-      this.logger.verbose('.getRefreshToken', { deviceId });
+      this.logger.verbose('.getRefreshToken');
 
       const token = await this.userRefreshTokenRepo.findOne({
-        where: { deviceId },
+        where: {
+          token: refreshToken,
+          isRevoked: false,
+          expiresAt: MoreThan(new Date()),
+        },
       });
       if (!token) return null;
 
