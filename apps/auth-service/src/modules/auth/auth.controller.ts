@@ -18,7 +18,7 @@ import { ValidatedHeaders } from './decorators/validate-header.decorator';
 import { LoginCommand } from './commands/impl/login.command';
 import { RefreshTokenResponse } from './responses/refresh-token.reponse';
 import { JwtAuthGuard } from './guard/jwt-auth.guard';
-import { UnAuthorizationResponse } from '../../responses/responses/un-authorization.response';
+import { UnAuthorizationResponse } from '../../responses/un-authorization.response';
 import { LogoutResponse } from './responses/logout.response';
 import { JwtTokenResponse } from './responses/jwt-token.response';
 import { GetUser } from './decorators/get-user-info.decorator';
@@ -107,7 +107,7 @@ export class AuthController {
     const messageResult = await this.commandBus.execute<
       RefreshTokenCommand,
       RefreshTokenInformationResponse
-    >(new RefreshTokenCommand(data.username, data.driverId, refreshToken));
+    >(new RefreshTokenCommand(data.username, data.deviceId, refreshToken));
 
     return {
       data: messageResult,
