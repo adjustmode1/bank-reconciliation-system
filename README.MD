@@ -10,10 +10,6 @@ flowchart LR
         U[User]
     end
 
-    subgraph Gateway["NGINX API Gateway"]
-        direction TB
-    end
-
     subgraph Services
         direction TB
         A[auth-service]
@@ -26,16 +22,18 @@ flowchart LR
         direction TB
         R[(Redis - shared session store)]
         P[(PostgreSQL - user data)]
+        M[(Minio)]
     end
 
     %% Flows
-    U --> Gateway
-    Gateway --> A
-    Gateway --> F
+    U --> A
+    U --> F
 
     A --> P
     A <--> R
     F <--> R
+    F <--> M
+    T <--> P
 
     F -->|Publish event| K
     K -->|Subscribe| T
