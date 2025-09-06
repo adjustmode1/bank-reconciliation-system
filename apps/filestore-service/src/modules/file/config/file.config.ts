@@ -39,7 +39,7 @@ export default registerAs<FileConfig>('file', () => {
     defaultMinioBucket: process.env.MINIO_DEFAULT_BUCKET ?? 'file',
     region: process.env.MINIO_REGION ?? 'us-east-1',
     publishURL: process.env.MINIO_PUBLISH_URL ?? 'http://127.0.0.1:9000',
-    fileDomain: process.env.fileDomain ?? 'bc',
+    fileDomain: process.env.FILE_DOMAIN ?? 'bank',
     maxFileSize: 5242880,
   };
 });

@@ -12,12 +12,20 @@ import redisConfig from './modules/cache/config/redis.config';
 import postgresqlConfig from './modules/store/config/postgresql.config';
 import { AuthModule } from './modules/auth/auth.module';
 import { KafkaModule } from './modules/kafka/kafka.module';
+import kafkaConfig from './modules/kafka/config/kafka.config';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [appConfig, authConfig, fileConfig, redisConfig, postgresqlConfig],
+      load: [
+        appConfig,
+        authConfig,
+        fileConfig,
+        redisConfig,
+        postgresqlConfig,
+        kafkaConfig,
+      ],
       envFilePath: [`.env.${process.env.NODE_ENV}`],
     }),
     TypeOrmModule.forRootAsync({
@@ -30,7 +38,7 @@ import { KafkaModule } from './modules/kafka/kafka.module';
         }),
         port: configService.getOrThrow<number>('postgres.port', {
           infer: true,
-        }),
+        }) as number,
         username: configService.getOrThrow<string>('postgres.username', {
           infer: true,
         }),

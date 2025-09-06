@@ -1,5 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Kafka, Admin } from 'kafkajs';
+import { AllConfigType } from 'src/config/config.type';
 
 @Injectable()
 export class KafkaTopicInitializerService {
@@ -8,22 +10,23 @@ export class KafkaTopicInitializerService {
   private readonly admin: Admin;
   private readonly topicsToEnsure: string[];
 
-  constructor() {
+  constructor(private readonly config: ConfigService<AllConfigType>) {
     this.kafka = new Kafka({
-      clientId: process.env.KAFKA_CLIENT_ID,
+      clientId: config.getOrThrow<string>('kafka.clientId', { infer: true }),
       brokers: [
-        process.env.KAFKA_BROKERS_1 as string,
-        process.env.KAFKA_BROKERS_2 as string,
-        process.env.KAFKA_BROKERS_3 as string,
+        config.getOrThrow<string>('kafka.kafka1', { infer: true }),
+        config.getOrThrow<string>('kafka.kafka2', { infer: true }),
+        config.getOrThrow<string>('kafka.kafka3', { infer: true }),
       ].filter(Boolean),
     });
     this.admin = this.kafka.admin();
-    this.topicsToEnsure = [process.env.KAFKA_FILE_TRANSACTION_TOPIC as string].filter(Boolean);
+    this.topicsToEnsure = [
+      config.getOrThrow<string>('kafka.transactionTopic', { infer: true }),
+      config.getOrThrow<string>('kafka.completedTransactionTopic', {
+        infer: true,
+      }),
+    ].filter(Boolean);
   }
-
-  // async onModuleInit() {
-    // await this.createTopics();
-  // }
 
   async createTopics() {
     await this.admin.connect();
@@ -33,7 +36,7 @@ export class KafkaTopicInitializerService {
       .filter((topic) => !existingTopics.includes(topic))
       .map((topic) => ({
         topic,
-        numPartitions: 3,    
+        numPartitions: 3,
         replicationFactor: 3,
       }));
 
@@ -42,7 +45,9 @@ export class KafkaTopicInitializerService {
         topics: topicsToCreate,
         waitForLeaders: true,
       });
-      this.logger.log(`Created topics: ${topicsToCreate.map(t => t.topic).join(', ')}`);
+      this.logger.log(
+        `Created topics: ${topicsToCreate.map((t) => t.topic).join(', ')}`,
+      );
     } else {
       this.logger.log('All topics already exist.');
     }

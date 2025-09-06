@@ -8,6 +8,7 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { UserEntity } from './user.entity';
+import { FileStatusEnum } from '../enums/file-status.enum';
 
 @Entity({ name: 'files' })
 export class FileEntity {
@@ -23,6 +24,9 @@ export class FileEntity {
   @Column({ name: 'file_path', type: 'text' })
   filePath!: string;
 
+  @Column({ name: 'file_status', enum: FileStatusEnum })
+  fileStatus: FileStatusEnum;
+
   @ManyToOne(() => UserEntity, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'uploaded_by', referencedColumnName: 'username' })
   user: UserEntity;
@@ -33,6 +37,6 @@ export class FileEntity {
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
 
-  @UpdateDateColumn({ name: 'updated_at', nullable: true})
+  @UpdateDateColumn({ name: 'updated_at', nullable: true })
   updatedAt?: Date;
 }

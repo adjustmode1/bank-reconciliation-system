@@ -6,6 +6,7 @@ import { CacheService } from '../../cache/cache.service';
 import { AllConfigType } from 'src/config/config.type';
 import { JwtTokenResponse } from '../responses/jwt-token.response';
 
+/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access */
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   private readonly logger = new Logger(JwtStrategy.name);

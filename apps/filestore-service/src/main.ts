@@ -11,7 +11,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService<AllConfigType>);
 
-  if (process.env.KAFKA_ENABLE == 'true') {
+  if (configService.getOrThrow<boolean>('kafka.isEnable', { infer: true })) {
     // create topic - kafka
     const topicInitializer = app.get(KafkaTopicInitializerService);
     await topicInitializer.createTopics();
@@ -21,21 +21,25 @@ async function bootstrap() {
       transport: Transport.KAFKA,
       options: {
         client: {
-          clientId: process.env.KAFKA_CLIENT_ID as string,
-          brokers:[
-            process.env.KAFKA_BROKERS_1 as string,
-            process.env.KAFKA_BROKERS_2 as string,
-            process.env.KAFKA_BROKERS_3 as string,
-          ]
+          clientId: configService.getOrThrow<string>('kafka.clientId', {
+            infer: true,
+          }),
+          brokers: [
+            configService.getOrThrow<string>('kafka.kafka1', { infer: true }),
+            configService.getOrThrow<string>('kafka.kafka2', { infer: true }),
+            configService.getOrThrow<string>('kafka.kafka3', { infer: true }),
+          ],
         },
         consumer: {
-          groupId: process.env.KAFKA_CONSUMER_GROUP_ID as string,
+          groupId: configService.getOrThrow<string>('kafka.groupId', {
+            infer: true,
+          }),
         },
         subscribe: { fromBeginning: true },
       },
     });
   }
-  
+
   // set prefix for app
   const appPrefix = configService.getOrThrow('app.apiPrefix', {
     infer: true,
