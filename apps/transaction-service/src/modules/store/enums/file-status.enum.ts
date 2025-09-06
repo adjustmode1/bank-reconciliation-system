@@ -1,0 +1,6 @@
+export enum FileStatusEnum {
+  CREATED = 'CREATED',
+  SYNC = 'SYNC',
+  SYNC_COMPLETED = 'SYNC_COMPLETED',
+  SYNC_FAILSED = 'SYNC_FALSED',
+}
