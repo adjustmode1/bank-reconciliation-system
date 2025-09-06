@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   ## Redis-Server
   ## docker-compose -f docker-compose.yml -p bank_reconciliation up -d redis_server
@@ -19,7 +17,9 @@ services:
       - "6379:6379"
     deploy:
       replicas: 1
-
+    networks:
+      - bank_network
+      
   ## Postgres-Server
   ## docker-compose -f docker-compose.yml -p bank_reconciliation up -d postgres_server
   ## docker-compose -f docker-compose.yml -p bank_reconciliation rm -f -s -v -a postgres_server
@@ -40,7 +40,9 @@ services:
       - "5432:5432"
     deploy:
       replicas: 1
-    
+    networks:
+      - bank_network
+
   ## Minio-Server
   ## docker-compose -f docker-compose.yml -p bank_reconciliation up -d minio_server
   ## docker-compose -f docker-compose.yml -p bank_reconciliation rm -f -s -v -a minio_server
@@ -68,6 +70,8 @@ services:
       retries: 3
     deploy:
       replicas: 1
+    networks:
+      - bank_network
 
   ## Kafka_kraft_broker_1 (without Zookeeper_1) (Cluster 3 broker for KRaft mode)
   ## docker-compose -f docker-compose.yml -p bank_reconciliation up -d kafka_kraft_broker_1
@@ -99,6 +103,8 @@ services:
       KAFKA_CFG_TRANSACTION_STATE_LOG_MIN_ISR: 2
     depends_on:
       - kafka_kraft_broker_2
+    networks:
+      - bank_network
 
   ## Kafka_kraft_broker_2 (without Zookeeper_1) (Cluster 3 broker for KRaft mode)
   ## docker-compose -f docker-compose.yml -p bank_reconciliation up -d kafka_kraft_broker_2
@@ -130,7 +136,8 @@ services:
       KAFKA_CFG_TRANSACTION_STATE_LOG_MIN_ISR: 2
     depends_on:
       - kafka_kraft_broker_3
-
+    networks:
+      - bank_network
   ## Kafka_kraft_broker_3 (without Zookeeper_1) (Cluster 3 broker for KRaft mode)
   ## docker-compose -f docker-compose.yml -p bank_reconciliation up -d kafka_kraft_broker_3
   ## docker-compose -f docker-compose.yml -p bank_reconciliation rm -f -s -v -a kafka_kraft_broker_3
@@ -159,4 +166,66 @@ services:
       KAFKA_CFG_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
       KAFKA_CFG_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
       KAFKA_CFG_TRANSACTION_STATE_LOG_MIN_ISR: 2
-  
+    networks:
+      - bank_network
+
+  ## auth_service
+  ## docker-compose -f docker-compose.yml -p bank_reconciliation up -d auth_service
+  ## docker-compose -f docker-compose.yml -p bank_reconciliation rm -f -s -v -a auth_service
+  ## docker exec -it auth_service /bin/sh
+  auth_service:
+    build:
+      context: ./apps/auth-service
+      dockerfile: Dockerfile
+    container_name: bank_reconciliation_auth_service
+    restart: always
+    depends_on:
+      - postgres_server
+      - redis_server
+    ports:
+      - "3000:3000"
+    networks:
+      - bank_network
+      
+  ## FileStore Service
+  ## docker-compose -f docker-compose.yml -p bank_reconciliation up -d filestore_service
+  ## docker-compose -f docker-compose.yml -p bank_reconciliation rm -f -s -v -a filestore_service
+  ## docker exec -it filestore_service /bin/sh
+  filestore_service:
+    build:
+      context: ./apps/filestore-service
+      dockerfile: Dockerfile
+    container_name: bank_reconciliation_filestore_service
+    restart: always
+    depends_on:
+      - postgres_server
+      - redis_server
+      - minio_server
+      - kafka_kraft_broker_1
+    ports:
+      - "3001:3001"
+    networks:
+      - bank_network
+
+  ## NestJS Transaction Service
+  ## docker-compose -f docker-compose.yml -p bank_reconciliation up -d transaction_service
+  ## docker-compose -f docker-compose.yml -p bank_reconciliation rm -f -s -v -a transaction_service
+  ## docker exec -it transaction_service /bin/sh
+  transaction_service:
+    build:
+      context: ./apps/transaction-service
+      dockerfile: Dockerfile
+    container_name: bank_reconciliation_transaction_service
+    restart: always
+    depends_on:
+      - postgres_server
+      - redis_server
+      - kafka_kraft_broker_1
+    ports:
+      - "3002:3002"
+    networks:
+      - bank_network
+
+networks:
+  bank_network:
+    driver: bridge
