@@ -17,12 +17,6 @@ export class UserRepository {
 
   // Init user CMS
   async onApplicationBootstrap() {
-    const env = process.env.NODE_ENV || 'development';
-    if (env !== 'development' && env !== 'test') {
-      this.logger.log(`Skipping user seed in environment: ${env}`);
-      return;
-    }
-
     const username = 'admin';
     const password = await this.authService.hashPassword('admin');
 

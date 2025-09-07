@@ -27,6 +27,9 @@ export class FileEntity {
   @Column({ name: 'file_status', enum: FileStatusEnum })
   fileStatus: FileStatusEnum;
 
+  @Column({ name: 'false_reason', nullable: true })
+  falseReason: string;
+  
   @ManyToOne(() => UserEntity, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'uploaded_by', referencedColumnName: 'username' })
   user: UserEntity;
