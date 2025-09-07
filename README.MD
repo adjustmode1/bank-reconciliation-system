@@ -3,6 +3,11 @@
 docker compose -p bank_reconciliation up -d
 ```
 
+# Api document 
+
+[Auth service](http://127.0.0.1:2025/auth/swagger) |
+[File store service](http://127.0.0.1:2025/filestore/swagger)
+
 # Api 
 
 Login
