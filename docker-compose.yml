@@ -9,7 +9,7 @@ services:
     container_name: bank_reconciliation_gateway
     restart: always
     ports:
-      - "2025:80"                     # host:container => truy cập qua host:2025
+      - "2025:80"
     volumes:
       - ./nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:

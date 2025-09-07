@@ -5,6 +5,7 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
   JoinColumn,
+  Index,
 } from 'typeorm';
 import { FileEntity } from './file.entity';
 import { TransactionTypeEnum } from '../enums/transaction-type.enum';
@@ -26,6 +27,7 @@ export class TransactionFileEntity {
   @Column({ type: 'timestamp' })
   date!: Date;
 
+  @Index()
   @Column({ type: 'uuid', name: 'file_id' })
   fileId!: string;
 
