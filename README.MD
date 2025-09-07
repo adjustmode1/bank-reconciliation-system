@@ -24,7 +24,6 @@ curl --location 'http://127.0.0.1:2025/auth/auth/login' \
 Logout
 ```shell
 curl --location 'http://127.0.0.1:2025/auth/auth/login' \
---header 'x-device-id: fffff' \
 --header 'Content-Type: application/json' \
 --data '{
     "username": "admin",
@@ -41,7 +40,6 @@ curl --location --request POST 'http://127.0.0.1:3000/auth/auth/refresh-token' \
 Upload file transaction
 ```shell
 curl --location 'http://127.0.0.1:2025/filestore/file/upload-transaction' \
---header 'x-device-id: fffff' \
 --header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiZGV2aWNlSWQiOiJmZmZmZiIsImlhdCI6MTc1NzI0OTUzMywiZXhwIjoxNzU3MzM1OTMzfQ.Y09nOvyDFNRZyHZcXG3U9GWhkTyknG8HLhqwstfkK3s' \
 --form 'file=@"/C:/Users/adjus/Downloads/test-for-type.csv"'
 ```
@@ -49,7 +47,6 @@ curl --location 'http://127.0.0.1:2025/filestore/file/upload-transaction' \
 Sync file transaction
 ```shell
 curl --location 'http://127.0.0.1:2025/filestore/file/sync-transaction' \
---header 'x-device-id: fffff' \
 --header 'Content-Type: application/json' \
 --header 'Authorization: Bearer token' \
 --data '{
