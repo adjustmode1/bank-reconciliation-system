@@ -104,3 +104,60 @@ flowchart LR
     K -->|Subscribe| T
 
 ```
+
+# ERD diagram
+```mermaid
+erDiagram
+    USER {
+        string username PK
+        string password
+        string name
+        enum sex
+        string code
+        string address
+        date create_at
+        date update_at
+        date delete_at
+    }
+
+    USER_REFRESH_TOKEN {
+        int userRefreshTokenId PK
+        string username FK
+        string token
+        string deviceId
+        date expiresAt
+        boolean isRevoked
+        date create_at
+        date update_at
+        date delete_at
+    }
+
+    FILES {
+        uuid fileId PK
+        string fileName
+        string fileType
+        text filePath
+        enum fileStatus
+        string falseReason
+        bigint size
+        string uploaded_by FK
+        date created_at
+        date updated_at
+    }
+
+    TRANSACTION_FILES {
+        uuid transactionFileId PK
+        decimal amount
+        text content
+        enum type
+        timestamp date
+        uuid file_id FK
+        date created_at
+    }
+
+    %% Relationships
+    USER ||--o{ USER_REFRESH_TOKEN : "has many"
+    USER ||--o{ FILES : "uploads"
+    FILES ||--o{ TRANSACTION_FILES : "contains"
+
+```
